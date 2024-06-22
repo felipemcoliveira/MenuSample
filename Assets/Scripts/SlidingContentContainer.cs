@@ -13,7 +13,7 @@ public enum SlideDirection
 
 [ExecuteAlways]
 [DefaultExecutionOrder(-1000)]
-public class SlidingContentContainer : UIBehaviour, ILayoutElement
+public class SlidingContentContainer : UIBehaviour, ILayoutGroup, ILayoutElement
 {
    private class ActiveContent
    {
@@ -39,12 +39,7 @@ public class SlidingContentContainer : UIBehaviour, ILayoutElement
             return -1;
          }
 
-         if (!Application.IsPlaying(this))
-         {
-            return LayoutUtility.GetPreferredHeight(m_SelectedContent);
-         }
-
-         return m_SmoothPreferredHeight;
+         return LayoutUtility.GetPreferredHeight(m_SelectedContent);
       }
    }
 
@@ -67,13 +62,9 @@ public class SlidingContentContainer : UIBehaviour, ILayoutElement
    [SerializeField]
    private float m_SlideSpeed = 1500;
 
-   [SerializeField]
-   private float m_SmoothPreferredHeightSpeed = 15;
-
    private DrivenRectTransformTracker m_Tracker;
    private List<RectTransform> m_Contents = new();
    private LinkedList<ActiveContent> m_ActiveContents = new();
-   private float m_SmoothPreferredHeight;
    private float m_NormalizedTranslation;
    private int m_TargetNormalizeTranslation;
 
@@ -238,14 +229,6 @@ public class SlidingContentContainer : UIBehaviour, ILayoutElement
          content.sizeDelta = new Vector2(rect.width, LayoutUtility.GetPreferredHeight(content));
       }
 
-      m_SmoothPreferredHeight = Mathf.MoveTowards(m_SmoothPreferredHeight,
-         selectedContentPreferredHeight, Time.deltaTime * m_SmoothPreferredHeightSpeed);
-
-      if (!Mathf.Approximately(m_SmoothPreferredHeight, selectedContentPreferredHeight))
-      {
-         LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
-      }
-
       if (m_ActiveContents.Count == 1)
       {
          return;
@@ -303,6 +286,16 @@ public class SlidingContentContainer : UIBehaviour, ILayoutElement
          content.anchoredPosition = new Vector2(x, 0);
          content.sizeDelta = new Vector2(rect.width, LayoutUtility.GetPreferredHeight(content));
       }
+   }
+
+   void ILayoutController.SetLayoutHorizontal()
+   {
+      // ILayoutGroup implementation is only required to bubble up the layout dirty event
+   }
+
+   void ILayoutController.SetLayoutVertical()
+   {
+      // ILayoutGroup implementation is only required to bubble up the layout dirty event
    }
 }
 
