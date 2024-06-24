@@ -68,34 +68,6 @@ public class SlidingContentContainer : UIBehaviour, ILayoutGroup, ILayoutElement
    private float m_NormalizedTranslation;
    private int m_TargetNormalizeTranslation;
 
-   void ILayoutElement.CalculateLayoutInputHorizontal()
-   {
-      m_Tracker.Clear();
-      m_Contents.Clear();
-
-      for (int i = 0; i < transform.childCount; i++)
-      {
-         var child = transform.GetChild(i);
-         if (child.TryGetComponent(out RectTransform content))
-         {
-            m_Contents.Add(content);
-
-            m_Tracker.Add(this, content,
-               DrivenTransformProperties.Anchors |
-               DrivenTransformProperties.AnchoredPosition |
-               DrivenTransformProperties.SizeDelta |
-               DrivenTransformProperties.Pivot);
-
-            content.anchorMin = Vector2.up;
-            content.anchorMax = Vector2.up;
-            content.pivot = Vector2.up;
-         }
-      }
-   }
-
-   void ILayoutElement.CalculateLayoutInputVertical()
-   { }
-
    public void Goto(RectTransform content)
    {
       int siblingIndex = content.GetSiblingIndex();
@@ -288,15 +260,55 @@ public class SlidingContentContainer : UIBehaviour, ILayoutGroup, ILayoutElement
       }
    }
 
-   void ILayoutController.SetLayoutHorizontal()
+   void ILayoutElement.CalculateLayoutInputHorizontal()
    {
-      // ILayoutGroup implementation is only required to bubble up the layout dirty event
+      m_Tracker.Clear();
+      m_Contents.Clear();
+
+      for (int i = 0; i < transform.childCount; i++)
+      {
+         var child = transform.GetChild(i);
+         if (child.TryGetComponent(out RectTransform content))
+         {
+            m_Contents.Add(content);
+
+            m_Tracker.Add(this, content,
+               DrivenTransformProperties.Anchors |
+               DrivenTransformProperties.AnchoredPosition |
+               DrivenTransformProperties.SizeDelta |
+               DrivenTransformProperties.Pivot);
+
+            content.anchorMin = Vector2.up;
+            content.anchorMax = Vector2.up;
+            content.pivot = Vector2.up;
+         }
+      }
    }
+
+   void ILayoutElement.CalculateLayoutInputVertical()
+   { }
 
    void ILayoutController.SetLayoutVertical()
    {
-      // ILayoutGroup implementation is only required to bubble up the layout dirty event
+      if (m_SelectedContent == null)
+      {
+         return;
+      }
+
+      int selectedIndex = m_Contents.IndexOf(m_SelectedContent);
+      if (selectedIndex < 0)
+      {
+         return;
+      }
+
+      float selectedContentPreferredHeight = LayoutUtility.GetPreferredHeight(m_SelectedContent);
+      var rect = RectTransform.rect;
+
+      UpdateImmediate(selectedIndex, selectedContentPreferredHeight, rect);
    }
+
+   void ILayoutController.SetLayoutHorizontal()
+   { }
 }
 
 

@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.bandoware.gameplaytags": {
+      "version": "https://github.com/BandoWare/GameplayTags.git#development",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "07b5b78c390fb7fe40bcd3f4f97c8ef151d3b855"
+    },
     "com.unity.collab-proxy": {
       "version": "2.3.1",
       "depth": 0,
